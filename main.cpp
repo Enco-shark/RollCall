@@ -163,10 +163,12 @@ int WINAPI wWinMain(HINSTANCE hi, HINSTANCE, PWSTR, int nShow) {
     g_bg = CreateSolidBrush(RGB(0xF0, 0xF8, 0xFF));
     g_font = CreateFontW(-S(80), 0, 0, 0, FW_BOLD, 0, 0, 0,
                          DEFAULT_CHARSET, 0, 0, CLEARTYPE_QUALITY, 0, L"黑体");
-    g_lbl = CreateWindowExW(0, L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_CENTER | WS_BORDER,
-        S(8), S(12), S(384), S(104), hw, (HMENU)ID_LBL, hi, nullptr);
+    // 标签+按钮作为一个整体在窗口内居中(上下左右), 两者之间留 16px 间距避免重叠
+    // 窗口 400x225, 标签 384x104, 按钮 100x48, 间距 16 => 整体高 168, 顶部留白 (225-168)/2 = 28
+    g_lbl = CreateWindowExW(0, L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE | WS_BORDER,
+        S(8), S(28), S(384), S(104), hw, (HMENU)ID_LBL, hi, nullptr);
     g_btn = CreateWindowExW(0, L"BUTTON", kButton, WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
-        S(144), S(132), S(100), S(48), hw, (HMENU)ID_BTN, hi, nullptr);
+        S((400 - 100) / 2), S(28 + 104 + 16), S(100), S(48), hw, (HMENU)ID_BTN, hi, nullptr);
     HFONT ui = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
     SendMessageW(g_btn, WM_SETFONT, (WPARAM)ui, TRUE);
     SendMessageW(g_lbl, WM_SETFONT, (WPARAM)g_font, TRUE);
