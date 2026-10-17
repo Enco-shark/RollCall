@@ -86,6 +86,14 @@ static void loadNames() {
     }
 }
 
+// 滚动动画: 所有姓名(含概率为 0 者)均匀随机闪烁
+static void showRolling() {
+    if (g_names.empty()) return;
+    std::uniform_int_distribution<size_t> d(0, g_names.size() - 1);
+    SetWindowTextW(g_lbl, g_names[d(g_rng)].c_str());
+}
+
+// 最终结果: 按权重加权随机(概率为 0 的姓名不会被抽中)
 static void showRandom() {
     double total = 0;
     for (double w : g_weights) if (w > 0) total += w;
@@ -118,7 +126,8 @@ static LRESULT CALLBACK WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
         return 0;
     case WM_TIMER:
         if (w == ID_TIMER) {
-            showRandom();
+            if (g_left == 1) showRandom();   // 最后一次: 按权重确定最终结果
+            else showRolling();              // 滚动过程: 均匀随机(概率为 0 的姓名也会闪烁)
             if (--g_left <= 0) { KillTimer(h, ID_TIMER); EnableWindow(g_btn, TRUE); SetFocus(g_btn); }
         }
         return 0;
