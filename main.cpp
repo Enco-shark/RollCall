@@ -23,6 +23,7 @@ static HWND g_lbl, g_btn;
 static HFONT g_font;
 static HBRUSH g_bg;
 static std::vector<std::wstring> g_names;
+static std::vector<double> g_weights;   // 每个姓名对应的权重(默认 1)
 static int g_left = 0;
 static std::mt19937 g_rng{std::random_device{}()};
 
@@ -48,8 +49,22 @@ static std::wstring trim(const std::wstring& s) {
     return a == std::wstring::npos ? L"" : s.substr(a, b - a + 1);
 }
 
+// 权重配置(硬编码): 在此处为指定姓名设置抽中概率权重, 无需修改 person.txt
+// 默认权重为 1(正常概率); 权重越大越容易被抽中, 0 表示永不抽中。
+static double weightFor(const std::wstring& name) {
+    // 李四: 概率设为零(永不抽中)
+    if (name == L"李四") return 0;
+
+    // 如需为其他姓名调整概率, 仿照下面示例添加:
+    // if (name == L"张三") return 3;    // 张三: 3 倍概率
+    // if (name == L"王五") return 0.5;  // 王五: 一半概率
+
+    return 1;   // 其余姓名保持正常概率
+}
+
 static void loadNames() {
     g_names.clear();
+    g_weights.clear();
     std::wstring path = exeDir() + L"\\person.txt";
     if (GetFileAttributesW(path.c_str()) == INVALID_FILE_ATTRIBUTES) {     // 不存在则创建空文件
         HANDLE h = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
@@ -63,12 +78,31 @@ static void loadNames() {
     }
     std::wstringstream ws(decode(data));
     std::wstring line;
-    while (std::getline(ws, line)) { line = trim(line); if (!line.empty()) g_names.push_back(line); }
+    while (std::getline(ws, line)) {
+        line = trim(line);
+        if (line.empty()) continue;
+        g_names.push_back(line);
+        g_weights.push_back(weightFor(line));   // 根据硬编码规则设置权重
+    }
 }
 
 static void showRandom() {
-    std::uniform_int_distribution<size_t> d(0, g_names.size() - 1);
-    SetWindowTextW(g_lbl, g_names[d(g_rng)].c_str());
+    double total = 0;
+    for (double w : g_weights) if (w > 0) total += w;
+    size_t idx = g_names.empty() ? 0 : g_names.size() - 1;
+    if (total > 0) {                                          // 按权重加权随机
+        std::uniform_real_distribution<double> d(0.0, total);
+        double r = d(g_rng);
+        for (size_t i = 0; i < g_weights.size(); ++i) {
+            if (g_weights[i] <= 0) continue;
+            r -= g_weights[i];
+            if (r <= 0) { idx = i; break; }
+        }
+    } else if (!g_names.empty()) {                            // 权重全为 0 时退化为均匀随机
+        std::uniform_int_distribution<size_t> d(0, g_names.size() - 1);
+        idx = d(g_rng);
+    }
+    SetWindowTextW(g_lbl, g_names[idx].c_str());
 }
 
 static LRESULT CALLBACK WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
