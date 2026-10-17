@@ -144,7 +144,11 @@ static LRESULT CALLBACK WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
 }
 
 int WINAPI wWinMain(HINSTANCE hi, HINSTANCE, PWSTR, int nShow) {
-    SetProcessDPIAware();
+    // 高 DPI 适配: 优先 Per-Monitor V2(Windows 10 1703+); 动态加载以兼容 Win7, 失败回落到系统 DPI 感知
+    typedef BOOL(WINAPI* SetDpiFn)(HANDLE);
+    SetDpiFn setDpi = (SetDpiFn)GetProcAddress(GetModuleHandleW(L"user32.dll"), "SetProcessDpiAwarenessContext");
+    if (setDpi) setDpi(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+    else SetProcessDPIAware();
     WNDCLASSW wc{};
     wc.lpfnWndProc = WndProc; wc.hInstance = hi; wc.lpszClassName = L"RollCallWnd";
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW); wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
