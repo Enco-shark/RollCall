@@ -9,6 +9,8 @@
 
 本项目为原 aardio 版（吾爱破解 micksoft）的 C++/Win32 重写版。
 
+> 📚 想了解实现原理、二次开发定制或故障排查？请阅读[详细说明文档](README_DETAILED.md)。
+
 ## ✨ 功能特性
 
 - 🎲 **一键随机点名**：点击「选一个」按钮随机抽取姓名
@@ -114,7 +116,8 @@ RollCall/
 ├── CMakeLists.txt   # CMake 构建脚本
 ├── main.cpp         # 程序源码（Win32 / C++17）
 ├── person.txt       # 示例名单（每行一个姓名）
-├── README.md        # 项目说明
+├── README.md        # 项目简介与快速上手
+├── README_DETAILED.md # 详细说明文档
 ├── LICENSE          # MIT 许可证
 ├── CONTRIBUTING.md  # 贡献指南
 └── .gitignore       # Git 忽略规则
