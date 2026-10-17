@@ -1,5 +1,5 @@
 // 随机点名助手 - C++/Win32 重写版
-// 还原自原 aardio 程序: 窗体 399x199, 标签显示姓名, 按钮"选一个",
+// 还原自原 aardio 程序: 窗体 400x225, 标签显示姓名, 按钮"选一个",
 // 读取程序目录下的 person.txt, 点击后滚动 30 次(每次 20ms)后停在随机姓名上。
 #ifndef UNICODE
 #define UNICODE
@@ -154,7 +154,7 @@ int WINAPI wWinMain(HINSTANCE hi, HINSTANCE, PWSTR, int nShow) {
     auto S = [&](int v) { return MulDiv(v, dpi, 96); };
 
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;   // 固定大小对话框边框, 无最大化
-    RECT rc{0, 0, S(399), S(199)}; AdjustWindowRect(&rc, style, FALSE);
+    RECT rc{0, 0, S(400), S(225)}; AdjustWindowRect(&rc, style, FALSE);
     int W = rc.right - rc.left, H = rc.bottom - rc.top;
     HWND hw = CreateWindowExW(0, wc.lpszClassName, kTitle, style,
         (GetSystemMetrics(SM_CXSCREEN) - W) / 2, (GetSystemMetrics(SM_CYSCREEN) - H) / 2, W, H,
